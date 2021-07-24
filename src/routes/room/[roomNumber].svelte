@@ -551,10 +551,10 @@
                                         <span class="text-nowrap small text-{ getColor(item.status) }">{ item.status ?? '' }</span>
                                     {/if}
 
-                                    <span class="text-muted small pe-1"></span>
-                                    <span class="text-nowrap small">
-                                        <span class="text-muted"><Icon name="calculator" />&nbsp;?</span>
-                                    </span>
+                                    {#if null !== (item.calculated ?? null) && (roomData.show || item.profileId === profileId)}
+                                        <span class="text-muted small pe-1">/</span>
+                                        <span class="text-nowrap small text-muted" title="{ item.calculatedInfo ?? ''}"><Icon name="calculator" />&nbsp;{ item.calculated ?? ''}</span>
+                                    {/if}
                                 </div>
                             </td>
                             <td class="d-none d-md-table-cell">
@@ -577,10 +577,10 @@
                                     <span class="text-nowrap small text-{ getColor(item.status) }">{ item.status ?? '' }</span>
                                 {/if}
 
-                                <span class="text-muted small px-1">/</span>
-                                <span class="text-nowrap">
-                                    <span class="fs-5 text-muted"><Icon name="calculator" />&nbsp;?</span>
-                                </span>
+                                {#if null !== (item.calculated ?? null) && (roomData.show || item.profileId === profileId)}
+                                    <span class="text-muted small px-1">/</span>
+                                    <span class="text-nowrap fs-5 text-muted" title="{ item.calculatedInfo ?? ''}"><Icon name="calculator" />&nbsp;{ item.calculated ?? ''}</span>
+                                {/if}
                             </td>
                         </tr>
                     {/each}

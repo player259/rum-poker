@@ -32,7 +32,28 @@ function buildRoomResponse(room, profileId) {
             delete data.profileId
         }
 
-        // TODO Add enum
+        // TODO Add enums (ts support)
+        function getOffset(value) {
+            switch (value) {
+                case 'XS': return 0
+                case 'S': return 1
+                case 'M': return 2
+                case 'L': return 3
+                case 'XXL': return 4
+                case 'Safe': return 0
+                case 'Unclear': return 1
+                case 'Risky': return 2
+                case 'Ready': return 0
+                case 'Solution/Contract required': return 1
+                case 'Needs research': return 3
+            }
+            return 0
+        }
+
+        const sp = [0, 1, 2, 3, 5, 8, 13, 20, 40, 100]
+        data.calculated = sp[getOffset(data.size) + getOffset(data.risk) + getOffset(data.status)]
+        data.calculatedInfo = 'Size +' + getOffset(data.size) + '\nRisk +' + getOffset(data.risk) + '\nStatus +' + getOffset(data.status);
+
         const busy3min = data.online === 'Busy' && data.updatedAt + 180000 < Date.now()
         const away10min = data.updatedAt + 600000 < Date.now()
         if (item.profileId !== profileId && (busy3min || away10min)) {
