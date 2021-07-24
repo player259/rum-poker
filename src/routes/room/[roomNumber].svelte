@@ -188,8 +188,10 @@
                 ready = true
             }
             eventSource.onerror = () => {
-                eventSource?.close()
-            	ready = false
+                if (null === ready) {
+                    ready = false
+                    eventSource?.close()
+                }
             }
         }
     }
@@ -256,6 +258,9 @@
         .profile-name {
             width: 100px;
             font-size: 1rem!important;
+        }
+        .reaction-name {
+            font-size: 0.75rem!important;
         }
     }
 </style>
@@ -447,7 +452,8 @@
                             ] as value}
                                 <Button color="link"
                                         outline
-                                        class="{ buttonStyle } { reactions.indexOf(value) !== -1 ? 'border border-secondary bg-light' : '' }"
+                                        class="shadow-none mb-1 py-sm-1 px-sm-2 { reactions.indexOf(value) !== -1 ? 'border border-secondary bg-light' : '' }"
+                                        style="padding: 0 0.2em"
                                         active="{ reactions.indexOf(value) !== -1 }"
                                         on:click={() => {
                                           const index = reactions.indexOf(value);
@@ -459,7 +465,7 @@
                                           reactions = reactions;
                                         }}
                                 >
-                                    <Emoji value="{ value }" /><div class="small">{ value }</div>
+                                    <Emoji value="{ value }" /><div class="small reaction-name">{ value }</div>
                                 </Button>&nbsp;
                             {/each}
                         {/if}
@@ -473,11 +479,12 @@
                 &nbsp;&nbsp;&nbsp;
                 <Button color="primary" size="sm" outline class="me-auto align-self-baseline { buttonStyle }" on:click={() => sendUpdate(!roomData.show ? 'show' : 'hide') }>{ !roomData?.show ? 'Show' : 'Hide' }</Button>
                 &nbsp;
-                <Button color="secondary" size="sm" outline class="align-self-baseline { buttonStyle }" on:click={() => sendUpdate('delete') }>Delete estimates</Button>
-                &nbsp;
-                <Button color="secondary" size="sm" outline class="align-self-baseline { buttonStyle }" on:click={() => sendUpdate('clear') }>Clear room</Button>
+                <div class="d-none d-md-inline-block">
+                    <Button color="secondary" size="sm" outline class="align-self-baseline { buttonStyle }" on:click={() => sendUpdate('delete') }>Delete estimates</Button>
+                    &nbsp;
+                    <Button color="secondary" size="sm" outline class="align-self-baseline { buttonStyle }" on:click={() => sendUpdate('clear') }>Clear room</Button>
+                </div>
             </div>
-
             <Table class="align-middle">
                 <thead>
                 <tr>
@@ -528,34 +535,25 @@
                                 {/if}
                                 <div class="d-block d-md-none text-break text-wrap">
                                     <span class="text-nowrap small">
-                                        <span class="pe-1">Size:</span>
                                         {#if roomData.show || item.profileId === profileId}
-                                            <span class="text-{ getColor(item.size) } pe-2">{ item.size ?? '?' }</span>
-                                        {:else}
-                                            <span class="text-secondary pe-2">X</span>
+                                            <span class="pe-1">Size:</span>
+                                            <span class="text-{ getColor(item.size) }">{ item.size ?? '?' }</span>
                                         {/if}
                                     </span>
 
+                                    {#if null !== item.risk && (roomData.show || item.profileId === profileId)}
+                                        <span class="text-muted small pe-1"></span>
+                                        <span class="text-nowrap small text-{ getColor(item.risk) }">{ item.risk ?? '' }</span>
+                                    {/if}
+
+                                    {#if null !== item.status && (roomData.show || item.profileId === profileId)}
+                                        <span class="text-muted small pe-1"></span>
+                                        <span class="text-nowrap small text-{ getColor(item.status) }">{ item.status ?? '' }</span>
+                                    {/if}
+
+                                    <span class="text-muted small pe-1"></span>
                                     <span class="text-nowrap small">
-                                        <span class="pe-1">Risk:</span>
-                                        {#if roomData.show || item.profileId === profileId}
-                                            <span class="text-{ getColor(item.risk) } pe-2">{ item.risk ?? '?' }</span>
-                                        {:else}
-                                            <span class="text-secondary pe-2">X</span>
-                                        {/if}
-                                    </span>
-
-                                    <span class="text-nowrap small">
-                                        <span class="pe-1">Status:</span>
-                                        {#if roomData.show || item.profileId === profileId}
-                                            <span class="text-{ getColor(item.status) } pe-2">{ item.status ?? '?' }</span>
-                                        {:else}
-                                            <span class="text-secondary pe-2">X</span>
-                                        {/if}
-                                    </span>
-
-                                    <span class="text-nowrap">
-                                        <span class="fs-5 text-muted"><Icon name="calculator" />?</span>
+                                        <span class="text-muted"><Icon name="calculator" />&nbsp;?</span>
                                     </span>
                                 </div>
                             </td>
@@ -563,32 +561,25 @@
                                 <span class="text-nowrap small">
                                     <span class="pe-1">Size:</span>
                                     {#if roomData.show || item.profileId === profileId}
-                                        <span class="text-{ getColor(item.size) } pe-2">{ item.size ?? '?' }</span>
+                                        <span class="text-{ getColor(item.size) }">{ item.size ?? '?' }</span>
                                     {:else}
-                                        <span class="text-secondary pe-2">X</span>
+                                        <span class="text-secondary">X</span>
                                     {/if}
                                 </span>
 
-                                <span class="text-nowrap small">
-                                    <span class="pe-1">Risk:</span>
-                                    {#if roomData.show || item.profileId === profileId}
-                                        <span class="text-{ getColor(item.risk) } pe-2">{ item.risk ?? '?' }</span>
-                                    {:else}
-                                        <span class="text-secondary pe-2">X</span>
-                                    {/if}
-                                </span>
+                                {#if null !== item.risk && (roomData.show || item.profileId === profileId)}
+                                    <span class="text-muted small px-1">/</span>
+                                    <span class="text-nowrap small text-{ getColor(item.risk) }">{ item.risk ?? '' }</span>
+                                {/if}
 
-                                <span class="small">
-                                    <span class="pe-1">Status:</span>
-                                    {#if roomData.show || item.profileId === profileId}
-                                        <span class="text-{ getColor(item.status) } pe-2">{ item.status ?? '?' }</span>
-                                    {:else}
-                                        <span class="text-secondary pe-2">X</span>
-                                    {/if}
-                                </span>
+                                {#if null !== item.status && (roomData.show || item.profileId === profileId)}
+                                    <span class="text-muted small px-1">/</span>
+                                    <span class="text-nowrap small text-{ getColor(item.status) }">{ item.status ?? '' }</span>
+                                {/if}
 
+                                <span class="text-muted small px-1">/</span>
                                 <span class="text-nowrap">
-                                    <span class="fs-5 text-muted"><Icon name="calculator" />?</span>
+                                    <span class="fs-5 text-muted"><Icon name="calculator" />&nbsp;?</span>
                                 </span>
                             </td>
                         </tr>
@@ -596,6 +587,12 @@
                 {/if}
                 </tbody>
             </Table>
+
+            <div class="d-block d-md-none mt-5">
+                <Button color="secondary" size="sm" outline class="align-self-baseline { buttonStyle }" on:click={() => sendUpdate('delete') }>Delete estimates</Button>
+                &nbsp;
+                <Button color="secondary" size="sm" outline class="align-self-baseline { buttonStyle }" on:click={() => sendUpdate('clear') }>Clear room</Button>
+            </div>
         </Col>
     </Row>
 </div>
