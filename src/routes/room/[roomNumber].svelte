@@ -10,6 +10,7 @@
 
     import { onMount } from 'svelte';
     import { onDestroy } from 'svelte';
+    import { fade } from 'svelte/transition';
     import {
         Button,
         Col,
@@ -23,6 +24,7 @@
         Tooltip,
         Input,
         Popover,
+        Alert,
         Styles
     } from 'sveltestrap'
     import Avatar from '$lib/Avatar/index.svelte'
@@ -61,6 +63,8 @@
     export let roomNumber: number = get(page).params.roomNumber
     let roomData = null
 
+    let newRoomNumber: number|null = null
+
     let eventSource: EventSource|null = null
     let lastUpdateData = {}
 
@@ -93,12 +97,15 @@
             .then(res => res.json())
             .then(res => {
                 goto('/room/' + res.roomNumber).then(() => {
+                    newRoomNumber = res.roomNumber
                     roomNumber = res.roomNumber
                     roomData = res
                     connectToSseServer()
                 })
             });
     }
+
+    let updateTimeoutId
 
     function sendUpdate(action: string|null = null) {
         if (!browser) {
@@ -121,15 +128,18 @@
             return
         }
 
-        fetch(
-            '/room/' + roomNumber + '/updates?profileId=' + profileId,
-            {
-                method: 'PATCH',
-                body: JSON.stringify({item: updateData, action }),
-                headers: { 'Content-Type': 'application/json' }
-            }
-        )
-            .then(res => res.ok ? lastUpdateData = updateData : ready = false)
+        clearTimeout(updateTimeoutId)
+        updateTimeoutId = setTimeout(() => {
+            fetch(
+                '/room/' + roomNumber + '/updates?profileId=' + profileId,
+                {
+                    method: 'PATCH',
+                    body: JSON.stringify({item: updateData, action }),
+                    headers: { 'Content-Type': 'application/json' }
+                }
+            )
+                .then(res => res.ok ? lastUpdateData = updateData : ready = false)
+        }, 500)
     }
 
     function connectToSseServer(): void {
@@ -177,7 +187,10 @@
 
                 ready = true
             }
-            eventSource.onerror = () => { ready = false }
+            eventSource.onerror = () => {
+                eventSource?.close()
+            	ready = false
+            }
         }
     }
 
@@ -220,12 +233,30 @@
             online = document.hidden ? OnlineEnum.busy : OnlineEnum.online
         });
     }
+
+    let buttonStyle = 'shadow-none mb-1 py-0 py-md-1 px-2'
 </script>
 
 <style>
     .minimize-width {
         width: 1%;
         white-space: nowrap;
+    }
+
+    .profile-name {
+        width: 200px;
+        font-size: 1.3rem!important;
+    }
+
+    @media (max-width: 575.98px) {
+        .minimize-width {
+            width: inherit;
+            white-space: inherit;
+        }
+        .profile-name {
+            width: 100px;
+            font-size: 1rem!important;
+        }
     }
 </style>
 
@@ -242,7 +273,7 @@
                 </div>
             </Popover>
             &nbsp;&nbsp;&nbsp;
-            <Button color="primary" size="sm" outline class="align-top shadow-none" on:click={() => createRoom()}>New room</Button>
+            <Button color="primary" size="sm" outline class="align-top { buttonStyle }" on:click={() => createRoom()}>New room</Button>
         </Col>
     </Row>
     <Row class="pb-5 { ready === null ? '' : 'd-none' }">
@@ -257,15 +288,26 @@
     </Row>
     <Row class="pb-5 { ready === true ? '' : 'd-none' }">
         <Col>
+            {#if null !== newRoomNumber }
+                <div
+                    in:fade="{{delay: 0, duration: 0}}"
+                    out:fade="{{delay: 1500, duration: 250}}"
+                    on:introend="{() => newRoomNumber = null }"
+                >
+                    <Alert color="success" class="my-3" style="opacity: 1 !important;" isOpen={true} fade={false}>Room successfully created!</Alert>
+                </div>
+            {/if}
             <Table class="align-middle my-3">
                 <thead>
                 <tr class="align-middle">
                     <th class="minimize-width">
                         <Emoji size="lg" value="{ EmojiEnum.person }" />
-                        <span>You:</span>
+                        <span class="align-middle">You:</span>
                     </th>
                     <th class="minimize-width border-end">
-                        <Input plaintext bind:value="{ profileName }" placeholder="Enter your name" class="d-inline-block lead px-2 { '' === profileName ? 'border border-danger' : '' }" style="width: 200px" />
+                        <div class="profile-name">
+                            <Input plaintext bind:value="{ profileName }" placeholder="Enter your name" class="d-inline-block fw-light px-2 { '' === profileName ? 'border border-danger' : '' }" />
+                        </div>
                     </th>
                     <th>
                         <Dropdown class="d-inline-block me-3">
@@ -273,7 +315,7 @@
                             <DropdownMenu>
                                 <div style="column-count: 7;">
                                     {#each Object.values(AvatarEnum).filter(key => !Number.isInteger(key)) as value}
-                                        <DropdownItem class="small" title="{ value }" on:click={() => profileAvatar = value}>
+                                        <DropdownItem class="small px-0 py-1 px-md-2 py-md-1" title="{ value }" on:click={() => profileAvatar = value}>
                                             <Avatar value="{ value }" />
                                         </DropdownItem>
                                     {/each}
@@ -297,7 +339,7 @@
                             <Button color="secondary"
                                     size="sm"
                                     outline
-                                    class="mb-1 shadow-none"
+                                    class="{ buttonStyle }"
                                     active="{ sp === value }"
                                     on:click={() => sp = sp === value ? null : value}
                             >
@@ -324,7 +366,7 @@
                             <Button color="{ getColor(value) }"
                                     size="sm"
                                     outline
-                                    class="mb-1 shadow-none"
+                                    class="{ buttonStyle }"
                                     active="{ size === value }"
                                     on:click={() => size = size === value ? null : value}
                             >
@@ -350,7 +392,7 @@
                             <Button color="{ getColor(value) }"
                                     size="sm"
                                     outline
-                                    class="mb-1 shadow-none"
+                                    class="{ buttonStyle }"
                                     active="{ risk === value }"
                                     on:click={() => risk = risk === value ? null : value}
                             >
@@ -376,7 +418,7 @@
                             <Button color="{ getColor(value) }"
                                     size="sm"
                                     outline
-                                    class="mb-1 shadow-none"
+                                    class="{ buttonStyle }"
                                     active="{ status === value }"
                                     on:click={() => status = status === value ? null : value}
                             >
@@ -405,7 +447,7 @@
                             ] as value}
                                 <Button color="link"
                                         outline
-                                        class="mb-1 shadow-none { reactions.indexOf(value) !== -1 ? 'border border-secondary bg-light' : '' }"
+                                        class="{ buttonStyle } { reactions.indexOf(value) !== -1 ? 'border border-secondary bg-light' : '' }"
                                         active="{ reactions.indexOf(value) !== -1 }"
                                         on:click={() => {
                                           const index = reactions.indexOf(value);
@@ -429,10 +471,11 @@
             <div class="d-flex mt-5 mb-3">
                 <span class="h3">Results</span>
                 &nbsp;&nbsp;&nbsp;
-                <Button color="primary" size="sm" outline class="me-auto align-self-baseline shadow-none" on:click={() => sendUpdate(!roomData.show ? 'show' : 'hide') }>{ !roomData?.show ? 'Show' : 'Hide' }</Button>
-                <Button color="secondary" size="sm" outline class="align-self-baseline shadow-none" on:click={() => sendUpdate('delete') }>Delete estimates</Button>
+                <Button color="primary" size="sm" outline class="me-auto align-self-baseline { buttonStyle }" on:click={() => sendUpdate(!roomData.show ? 'show' : 'hide') }>{ !roomData?.show ? 'Show' : 'Hide' }</Button>
                 &nbsp;
-                <Button color="secondary" size="sm" outline class="align-self-baseline shadow-none" on:click={() => sendUpdate('clear') }>Clear room</Button>
+                <Button color="secondary" size="sm" outline class="align-self-baseline { buttonStyle }" on:click={() => sendUpdate('delete') }>Delete estimates</Button>
+                &nbsp;
+                <Button color="secondary" size="sm" outline class="align-self-baseline { buttonStyle }" on:click={() => sendUpdate('clear') }>Clear room</Button>
             </div>
 
             <Table class="align-middle">
@@ -441,7 +484,7 @@
                     <th class="minimize-width"></th>
                     <th colspan="3">Name</th>
                     <th class="minimize-width">Estimation</th>
-                    <th>Details</th>
+                    <th class="d-none d-md-table-cell">Details</th>
                 </tr>
                 </thead>
                 <tbody>
@@ -452,17 +495,30 @@
                                 <Icon name="circle-fill { item.profileId === profileId ? 'fs-4' : 'small' }" class="text-{ getColor(item.online) }" />
                             </td>
                             <td class="minimize-width">
-                                <Avatar value="{ item.profileAvatar }" />
+                                <div class="d-block d-md-none profile-name fw-light">{ item.profileName }</div>
+                                <Avatar class="d-none d-md-block" value="{ item.profileAvatar }" />
+                                <div class="d-inline-block d-md-none mt-1">
+                                    <Avatar size="sm" class="p-1" value="{ item.profileAvatar }" />
+                                    {#if roomData.show || item.profileId === profileId}
+                                        {#each item.reactions as reaction}
+                                            <Emoji class="p-1" value="{ reaction }" />
+                                        {/each}
+                                    {/if}
+                                </div>
                             </td>
-                            <td>
-                                <span class="lead">{ item.profileName }</span>
+                            <td class="p-0 p-md-2">
+                                <div class="d-none d-md-table-cell">
+                                    <span class="profile-name fw-light">{ item.profileName }</span>
+                                </div>
                             </td>
-                            <td>
-                                {#if roomData.show || item.profileId === profileId}
-                                    {#each item.reactions as reaction}
-                                        <span class="p-1"><Emoji value="{ reaction }" /></span>
-                                    {/each}
-                                {/if}
+                            <td class="p-0 p-md-2">
+                                <div class="d-none d-md-table-cell">
+                                    {#if roomData.show || item.profileId === profileId}
+                                        {#each item.reactions as reaction}
+                                            <Emoji class="p-1" value="{ reaction }" />
+                                        {/each}
+                                    {/if}
+                                </div>
                             </td>
                             <td class="minimize-width">
                                 {#if roomData.show || item.profileId === profileId}
@@ -470,31 +526,70 @@
                                 {:else}
                                     <span class="fs-4">X</span>
                                 {/if}
+                                <div class="d-block d-md-none text-break text-wrap">
+                                    <span class="text-nowrap small">
+                                        <span class="pe-1">Size:</span>
+                                        {#if roomData.show || item.profileId === profileId}
+                                            <span class="text-{ getColor(item.size) } pe-2">{ item.size ?? '?' }</span>
+                                        {:else}
+                                            <span class="text-secondary pe-2">X</span>
+                                        {/if}
+                                    </span>
+
+                                    <span class="text-nowrap small">
+                                        <span class="pe-1">Risk:</span>
+                                        {#if roomData.show || item.profileId === profileId}
+                                            <span class="text-{ getColor(item.risk) } pe-2">{ item.risk ?? '?' }</span>
+                                        {:else}
+                                            <span class="text-secondary pe-2">X</span>
+                                        {/if}
+                                    </span>
+
+                                    <span class="text-nowrap small">
+                                        <span class="pe-1">Status:</span>
+                                        {#if roomData.show || item.profileId === profileId}
+                                            <span class="text-{ getColor(item.status) } pe-2">{ item.status ?? '?' }</span>
+                                        {:else}
+                                            <span class="text-secondary pe-2">X</span>
+                                        {/if}
+                                    </span>
+
+                                    <span class="text-nowrap">
+                                        <span class="fs-5 text-muted"><Icon name="calculator" />?</span>
+                                    </span>
+                                </div>
                             </td>
-                            <td class="small">
-                                <span class="text-nowrap pe-1">Size:</span>
-                                {#if roomData.show || item.profileId === profileId}
-                                    <span class="text-{ getColor(item.size) } pe-2">{ item.size ?? '?' }</span>
-                                {:else}
-                                    <span class="text-secondary pe-2">X</span>
-                                {/if}
+                            <td class="d-none d-md-table-cell">
+                                <span class="text-nowrap small">
+                                    <span class="pe-1">Size:</span>
+                                    {#if roomData.show || item.profileId === profileId}
+                                        <span class="text-{ getColor(item.size) } pe-2">{ item.size ?? '?' }</span>
+                                    {:else}
+                                        <span class="text-secondary pe-2">X</span>
+                                    {/if}
+                                </span>
 
-                                <span class="text-nowrap pe-1">Risk:</span>
-                                {#if roomData.show || item.profileId === profileId}
-                                    <span class="text-{ getColor(item.risk) } pe-2">{ item.risk ?? '?' }</span>
-                                {:else}
-                                    <span class="text-secondary pe-2">X</span>
-                                {/if}
+                                <span class="text-nowrap small">
+                                    <span class="pe-1">Risk:</span>
+                                    {#if roomData.show || item.profileId === profileId}
+                                        <span class="text-{ getColor(item.risk) } pe-2">{ item.risk ?? '?' }</span>
+                                    {:else}
+                                        <span class="text-secondary pe-2">X</span>
+                                    {/if}
+                                </span>
 
-                                <span class="text-nowrap pe-1">Status:</span>
-                                {#if roomData.show || item.profileId === profileId}
-                                    <span class="text-{ getColor(item.status) } pe-2">{ item.status ?? '?' }</span>
-                                {:else}
-                                    <span class="text-secondary pe-2">X</span>
-                                {/if}
+                                <span class="small">
+                                    <span class="pe-1">Status:</span>
+                                    {#if roomData.show || item.profileId === profileId}
+                                        <span class="text-{ getColor(item.status) } pe-2">{ item.status ?? '?' }</span>
+                                    {:else}
+                                        <span class="text-secondary pe-2">X</span>
+                                    {/if}
+                                </span>
 
-                                <span class="fs-5 text-muted">
-                                <Icon name="calculator" />?</span>
+                                <span class="text-nowrap">
+                                    <span class="fs-5 text-muted"><Icon name="calculator" />?</span>
+                                </span>
                             </td>
                         </tr>
                     {/each}

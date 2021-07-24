@@ -93,8 +93,10 @@ const handler = async (req, res, next) => {
         res.writeHead(200, {
             'Content-Type': 'text/event-stream',
             'Connection': 'keep-alive',
-            'Cache-Control': 'no-cache'
+            'Cache-Control': 'no-cache',
+            'X-Accel-Buffering': 'no',
         });
+        res.write('\n');
 
         const data = `data: ${JSON.stringify(buildRoomResponse(rooms[roomNumber], profileId))}\n\n`;
         res.write(data);
