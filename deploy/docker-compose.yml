@@ -1,0 +1,29 @@
+version: "3.4"
+
+services:
+    nginx:
+        image: umputun/nginx-le:latest
+        hostname: nginx
+        container_name: nginx
+        ports:
+            - "80:80"
+            - "443:443"
+        restart: always
+        depends_on:
+            - frontend
+        volumes:
+            - /var/app/ssl:/etc/nginx/ssl
+            - /var/app/service.conf:/etc/nginx/service.conf
+        environment:
+            - TZ=GMT
+            - LETSENCRYPT=true
+            - LE_EMAIL=${EMAIL}
+            - LE_FQDN=${DOMAIN}
+
+    frontend:
+        build:
+            context: ../
+            dockerfile: prod.dockerfile
+        hostname: app
+        container_name: app
+        restart: always
