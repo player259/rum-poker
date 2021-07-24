@@ -68,6 +68,14 @@
     let eventSource: EventSource|null = null
     let lastUpdateData = {}
 
+    function changeRoom(inputRoomNumber: number) {
+        ready = null
+        goto('/room/' + inputRoomNumber).then(() => {
+            roomNumber = inputRoomNumber
+            connectToSseServer()
+        })
+    }
+
     function createRoom() {
         if (!browser) {
             return
@@ -96,6 +104,7 @@
         )
             .then(res => res.json())
             .then(res => {
+                ready = null
                 goto('/room/' + res.roomNumber).then(() => {
                     newRoomNumber = res.roomNumber
                     roomNumber = res.roomNumber
@@ -236,7 +245,7 @@
         });
     }
 
-    let buttonStyle = 'shadow-none mb-1 py-0 py-md-1 px-2'
+    let buttonStyle = 'shadow-none py-0 py-md-1 px-2'
 </script>
 
 <style>
@@ -270,15 +279,24 @@
 <div class="container">
     <Row class="pt-5">
         <Col>
-            <span class="h3">Room #{ roomNumber }</span>
-            <Button color="link" size="sm" class="align-top shadow-none" id="share-room" on:click={() => navigator.clipboard.writeText(window.location.href)}><Icon name="share" /></Button>
+            <span class="h3">
+                <span>Room #</span>
+                <Input plaintext
+                       type="number"
+                       value="{ roomNumber }"
+                       on:change={(e) => changeRoom(e.target.value)}
+                       placeholder="Enter room"
+                       class="room-number d-inline-block"
+                       style="width: 90px"
+                />
+            </span>
+            <Button color="link" size="sm" class="align-text-bottom shadow-none" id="share-room" on:click={() => navigator.clipboard.writeText(window.location.href)}><Icon name="share" /></Button>
             <Popover placement="right" target="share-room" dismissible>
                 <div class="text-nowrap text-truncate">
                     Link copied: <a href="{ window.location.href }" target="_blank">{ window.location.href }</a>
                 </div>
             </Popover>
-            &nbsp;&nbsp;&nbsp;
-            <Button color="primary" size="sm" outline class="align-top { buttonStyle }" on:click={() => createRoom()}>New room</Button>
+            <Button color="primary" size="sm" outline class="align-text-bottom { buttonStyle }" on:click={() => createRoom()}>New room</Button>
         </Col>
     </Row>
     <Row class="pb-5 { ready === null ? '' : 'd-none' }">
@@ -344,7 +362,7 @@
                             <Button color="secondary"
                                     size="sm"
                                     outline
-                                    class="{ buttonStyle }"
+                                    class="mb-1 { buttonStyle }"
                                     active="{ sp === value }"
                                     on:click={() => sp = sp === value ? null : value}
                             >
@@ -371,7 +389,7 @@
                             <Button color="{ getColor(value) }"
                                     size="sm"
                                     outline
-                                    class="{ buttonStyle }"
+                                    class="mb-1 { buttonStyle }"
                                     active="{ size === value }"
                                     on:click={() => size = size === value ? null : value}
                             >
@@ -397,7 +415,7 @@
                             <Button color="{ getColor(value) }"
                                     size="sm"
                                     outline
-                                    class="{ buttonStyle }"
+                                    class="mb-1 { buttonStyle }"
                                     active="{ risk === value }"
                                     on:click={() => risk = risk === value ? null : value}
                             >
@@ -423,7 +441,7 @@
                             <Button color="{ getColor(value) }"
                                     size="sm"
                                     outline
-                                    class="{ buttonStyle }"
+                                    class="mb-1 { buttonStyle }"
                                     active="{ status === value }"
                                     on:click={() => status = status === value ? null : value}
                             >

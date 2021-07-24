@@ -5,6 +5,20 @@
 		<link rel="icon" href="/favicon.png" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		%svelte.head%
+
+		<!-- TODO Move to page style -->
+		<style>
+			/* Chrome, Safari, Edge, Opera */
+			input.room-number::-webkit-outer-spin-button,
+			input.room-number::-webkit-inner-spin-button {
+				-webkit-appearance: none;
+				margin: 0;
+			}
+			/* Firefox */
+			input.room-number[type=number] {
+				-moz-appearance: textfield;
+			}
+		</style>
 	</head>
 	<body class="d-flex flex-column h-100">
 		<div id="svelte" class="d-flex flex-column h-100">%svelte.body%</div>
