@@ -15,4 +15,4 @@ docker-machine scp -r -d ${PWD}/ rum-poker:/var/app/
 docker-compose up -d
 docker-compose ps
 docker-compose logs
-docker image prune -a
+docker image prune -a -f

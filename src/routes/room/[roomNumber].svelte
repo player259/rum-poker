@@ -570,55 +570,53 @@
                                 {:else}
                                     <span class="fs-4">X</span>
                                 {/if}
-                                {#if !compareMode}
+                                {#if !compareMode && (roomData.show || item.profileId === profileId)}
                                     <div class="d-block d-md-none text-break text-wrap">
-                                        <span class="text-nowrap small">
-                                            {#if roomData.show || item.profileId === profileId}
-                                                <span class="pe-1">Size:</span>
-                                                <span class="text-{ getColor(item.size) }">{ item.size ?? '?' }</span>
-                                            {/if}
-                                        </span>
+                                        {#if null !== item.size}
+                                            <span class="text-nowrap small">
+                                                <span>Size:</span>&nbsp;
+                                                <span class="text-{ getColor(item.size) }">{ item.size ?? '' }</span>
+                                            </span>
+                                        {/if}
 
-                                        {#if null !== item.risk && (roomData.show || item.profileId === profileId)}
-                                            <span class="text-muted small pe-1"></span>
+                                        {#if null !== item.risk}
+                                            {#if null !== item.size}<span class="text-muted small pe-1"></span>{/if}
                                             <span class="text-nowrap small text-{ getColor(item.risk) }">{ item.risk ?? '' }</span>
                                         {/if}
 
-                                        {#if null !== item.status && (roomData.show || item.profileId === profileId)}
-                                            <span class="text-muted small pe-1"></span>
+                                        {#if null !== item.status}
+                                            {#if null !== item.risk || null !== item.size}<span class="text-muted small pe-1"></span>{/if}
                                             <span class="text-nowrap small text-{ getColor(item.status) }">{ item.status ?? '' }</span>
                                         {/if}
 
-                                        {#if null !== (item.calculated ?? null) && (roomData.show || item.profileId === profileId)}
-                                            <span class="text-muted small pe-1">/</span>
+                                        {#if null !== sp && null !== (item.calculated ?? null)}
+                                            {#if null !== item.risk || null !== item.size || null !== item.status}<span class="text-muted small pe-1">/</span>{/if}
                                             <span class="text-nowrap small text-muted" title="{ item.calculatedInfo ?? ''}"><Icon name="calculator" />&nbsp;{ item.calculated ?? ''}</span>
                                         {/if}
                                     </div>
                                 {/if}
                             </td>
-                            {#if !compareMode}
+                            {#if !compareMode && (roomData.show || item.profileId === profileId)}
                                 <td class="d-none d-md-table-cell">
-                                    <span class="text-nowrap small">
-                                        <span class="pe-1">Size:</span>
-                                        {#if roomData.show || item.profileId === profileId}
-                                            <span class="text-{ getColor(item.size) }">{ item.size ?? '?' }</span>
-                                        {:else}
-                                            <span class="text-secondary">X</span>
-                                        {/if}
-                                    </span>
+                                    {#if null !== item.size}
+                                        <span class="text-nowrap small">
+                                            <span>Size:</span>&nbsp;
+                                            <span class="text-{ getColor(item.size) }">{ item.size ?? '' }</span>
+                                        </span>
+                                    {/if}
 
-                                    {#if null !== item.risk && (roomData.show || item.profileId === profileId)}
-                                        <span class="text-muted small px-1">/</span>
+                                    {#if null !== item.risk}
+                                        {#if null !== item.size}<span class="text-muted small px-1">/</span>{/if}
                                         <span class="text-nowrap small text-{ getColor(item.risk) }">{ item.risk ?? '' }</span>
                                     {/if}
 
-                                    {#if null !== item.status && (roomData.show || item.profileId === profileId)}
-                                        <span class="text-muted small px-1">/</span>
+                                    {#if null !== item.status}
+                                        {#if null !== item.risk || null !== item.size}<span class="text-muted small px-1">/</span>{/if}
                                         <span class="text-nowrap small text-{ getColor(item.status) }">{ item.status ?? '' }</span>
                                     {/if}
 
-                                    {#if null !== (item.calculated ?? null) && (roomData.show || item.profileId === profileId)}
-                                        <span class="text-muted small px-1">/</span>
+                                    {#if null !== sp && null !== (item.calculated ?? null)}
+                                        {#if null !== item.risk || null !== item.size || null !== item.status}<span class="text-muted small px-1">/</span>{/if}
                                         <span class="text-nowrap fs-5 text-muted" title="{ item.calculatedInfo ?? ''}"><Icon name="calculator" />&nbsp;{ item.calculated ?? ''}</span>
                                     {/if}
                                 </td>
