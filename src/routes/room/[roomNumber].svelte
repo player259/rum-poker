@@ -141,6 +141,42 @@
             return
         }
 
+        // Duplicate logic from server for faster UI response
+        let index = roomData.data.findIndex(item => item.profileId === profileId)
+        if (-1 !== index) {
+            roomData.data[index].sp = sp
+            roomData.data[index].size = size
+            roomData.data[index].risk = risk
+            roomData.data[index].status = status
+            roomData.data[index].reactions = reactions
+            roomData = roomData
+        }
+
+        // Duplicate logic from server for faster UI response
+        switch (action) {
+            case 'show':
+                roomData.show = true
+                break;
+            case 'hide':
+                roomData.show = false
+                break;
+            case 'reset':
+                roomData.data.forEach(item => {
+                    item.sp = null
+                    item.size = null
+                    item.risk = null
+                    item.status = null
+                    item.reactions = []
+                })
+                roomData.show = false
+                break;
+            case 'clear':
+                roomData.data = [
+                    updateData
+                ];
+                break;
+        }
+
         clearTimeout(updateTimeoutId)
         updateTimeoutId = setTimeout(() => {
             fetch(
@@ -176,7 +212,7 @@
                 roomData = JSON.parse(event.data)
 
                 let index = roomData.data.findIndex(item => item.profileId === profileId)
-                if (-1 !== index) {
+                if (null === ready && -1 !== index) {
                     sp = roomData.data[index].sp
                     size = roomData.data[index].size
                     risk = roomData.data[index].risk
