@@ -152,6 +152,27 @@
             roomData.data[index].risk = risk
             roomData.data[index].status = status
             roomData.data[index].reactions = reactions
+
+            // Duplicate logic from server for faster UI response
+            const getOffset = function (value) {
+                switch (value) {
+                    case SizeEnum.XS: return 0
+                    case SizeEnum.S: return 1
+                    case SizeEnum.M: return 2
+                    case SizeEnum.L: return 3
+                    case SizeEnum.XXL: return 4
+                    case RiskEnum.Safe: return 0
+                    case RiskEnum.Unclear: return 1
+                    case RiskEnum.Risky: return 2
+                    case StatusEnum.Ready: return 0
+                    case StatusEnum.SolutionContractRequired: return 1
+                    case StatusEnum.NeedsResearch: return 3
+                }
+                return 0
+            }
+            const spScale = [0, 1, 2, 3, 5, 8, 13, 20, 40, 100]
+            roomData.data[index].calculated = spScale[getOffset(size) + getOffset(risk) + getOffset(status)]
+
             roomData = roomData
         }
 
@@ -641,8 +662,8 @@
                                             <span class="text-nowrap small text-{ getColor(item.status) }">{ item.status ?? '' }</span>
                                         {/if}
 
-                                        {#if null !== sp && null !== (item.calculated ?? null)}
-                                            {#if null !== item.risk || null !== item.size || null !== item.status}<span class="text-muted small pe-1">/</span>{/if}
+                                        {#if (null !== item.risk || null !== item.size || null !== item.status) && null !== (item.calculated ?? null)}
+                                            <span class="text-muted small pe-1">/</span>
                                             <span class="text-nowrap small text-muted" title="{ item.calculatedInfo ?? ''}"><Icon name="calculator" />&nbsp;{ item.calculated ?? ''}</span>
                                         {/if}
                                     </div>
@@ -668,8 +689,8 @@
                                             <span class="text-nowrap small text-{ getColor(item.status) }">{ item.status ?? '' }</span>
                                         {/if}
 
-                                        {#if null !== sp && null !== (item.calculated ?? null)}
-                                            {#if null !== item.risk || null !== item.size || null !== item.status}<span class="text-muted small px-1">/</span>{/if}
+                                        {#if (null !== item.risk || null !== item.size || null !== item.status) && null !== (item.calculated ?? null)}
+                                            <span class="text-muted small px-1">/</span>
                                             <span class="text-nowrap fs-5 text-muted" title="{ item.calculatedInfo ?? ''}"><Icon name="calculator" />&nbsp;{ item.calculated ?? ''}</span>
                                         {/if}
                                     {/if}

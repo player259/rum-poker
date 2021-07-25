@@ -50,8 +50,8 @@ function buildRoomResponse(room, profileId) {
             return 0
         }
 
-        const sp = [0, 1, 2, 3, 5, 8, 13, 20, 40, 100]
-        data.calculated = sp[getOffset(data.size) + getOffset(data.risk) + getOffset(data.status)]
+        const spScale = [0, 1, 2, 3, 5, 8, 13, 20, 40, 100]
+        data.calculated = spScale[getOffset(data.size) + getOffset(data.risk) + getOffset(data.status)]
         data.calculatedInfo = 'Size +' + getOffset(data.size) + '\nRisk +' + getOffset(data.risk) + '\nStatus +' + getOffset(data.status);
 
         const busy3min = data.online === 'Busy' && data.updatedAt + 180000 < Date.now()
