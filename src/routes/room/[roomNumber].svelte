@@ -300,9 +300,8 @@
                     Link copied: <a href="{ window.location.href }" target="_blank">{ window.location.href }</a>
                 </div>
             </Popover>
-            <Button color="primary" size="sm" outline class="align-text-bottom { buttonStyle }" on:click={() => createRoom()}>New room</Button>
-            <span class="align-text-bottom { ready === true ? '' : 'd-none' }">
-                &nbsp;&nbsp;&nbsp;
+            <Button color="primary" size="sm" outline class="align-text-bottom me-3 { buttonStyle }" on:click={() => createRoom()}>New room</Button>
+            <span class="align-text-bottom text-nowrap { ready === true ? '' : 'd-none' }">
                 <Label for="boring-mode" class="align-text-bottom m-0">Boring mode</Label>
                 &nbsp;
                 <Input type="switch"
