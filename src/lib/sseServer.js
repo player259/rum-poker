@@ -154,7 +154,7 @@ const handler = async (req, res, next) => {
                     case 'hide':
                         rooms[roomNumber].show = false
                         break;
-                    case 'delete':
+                    case 'reset':
                         rooms[roomNumber].data.forEach(item => {
                             item.sp = null
                             item.size = null
@@ -162,6 +162,7 @@ const handler = async (req, res, next) => {
                             item.status = null
                             item.reactions = []
                         })
+                        rooms[roomNumber].show = false
                         break;
                     case 'clear':
                         rooms[roomNumber].data = [

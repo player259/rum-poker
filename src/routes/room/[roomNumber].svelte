@@ -43,14 +43,17 @@
     const profileIdStore = writable('profileId', uuid4())
     const profileNameStore = writable('profileName', '')
     const profileAvatarStore = writable('profileAvatar', AvatarEnum.man)
+    const boringModeStore = writable('boringMode', false)
 
     let profileId: string = get(profileIdStore)
     let profileName: string = get(profileNameStore)
     let profileAvatar: AvatarEnum = get(profileAvatarStore)
+    let boringMode: boolean = get(boringModeStore)
 
     $: profileIdStore.set(profileId)
     $: profileNameStore.set(profileName)
     $: profileAvatarStore.set(profileAvatar)
+    $: boringModeStore.set(boringMode)
 
     let online: OnlineEnum = OnlineEnum.online
     let sp: StoryPointEnum|null = null
@@ -247,12 +250,11 @@
     }
 
     let buttonStyle = 'shadow-none py-0 py-md-1 px-2'
-    let compareMode = false
 </script>
 
 <style>
     .minimize-width {
-        width: 1%;
+        width: 0.01%;
         white-space: nowrap;
     }
 
@@ -299,6 +301,16 @@
                 </div>
             </Popover>
             <Button color="primary" size="sm" outline class="align-text-bottom { buttonStyle }" on:click={() => createRoom()}>New room</Button>
+            <span class="align-text-bottom { ready === true ? '' : 'd-none' }">
+                &nbsp;&nbsp;&nbsp;
+                <Label for="boring-mode" class="align-text-bottom m-0">Boring mode</Label>
+                &nbsp;
+                <Input type="switch"
+                       id="boring-mode"
+                       bind:checked={ boringMode }
+                       class="d-inline-block align-text-bottom m-0"
+                />
+            </span>
         </Col>
     </Row>
     <Row class="pb-5 { ready === null ? '' : 'd-none' }">
@@ -329,24 +341,26 @@
                         <Emoji size="lg" value="{ EmojiEnum.person }" />
                         <span class="align-middle">You:</span>
                     </th>
-                    <th class="minimize-width border-end">
+                    <th class="minimize-width { boringMode === false ? 'border-end' : '' }">
                         <div class="profile-name">
                             <Input plaintext bind:value="{ profileName }" placeholder="Enter your name" class="d-inline-block fw-light px-2 { '' === profileName ? 'border border-danger' : '' }" />
                         </div>
                     </th>
                     <th>
-                        <Dropdown class="d-inline-block me-3">
-                            <DropdownToggle size="sm" color="link" outline caret><Avatar value="{ profileAvatar }" /></DropdownToggle>
-                            <DropdownMenu>
-                                <div style="column-count: 7;">
-                                    {#each Object.values(AvatarEnum).filter(key => !Number.isInteger(key)) as value}
-                                        <DropdownItem class="small px-0 py-1 px-md-2 py-md-1" title="{ value }" on:click={() => profileAvatar = value}>
-                                            <Avatar value="{ value }" />
-                                        </DropdownItem>
-                                    {/each}
-                                </div>
-                            </DropdownMenu>
-                        </Dropdown>
+                        {#if !boringMode}
+                            <Dropdown class="d-inline-block me-3">
+                                <DropdownToggle size="sm" color="link" outline caret><Avatar value="{ profileAvatar }" /></DropdownToggle>
+                                <DropdownMenu>
+                                    <div style="column-count: 7;">
+                                        {#each Object.values(AvatarEnum).filter(key => !Number.isInteger(key)) as value}
+                                            <DropdownItem class="small px-0 py-1 px-md-2 py-md-1" title="{ value }" on:click={() => profileAvatar = value}>
+                                                <Avatar value="{ value }" />
+                                            </DropdownItem>
+                                        {/each}
+                                    </div>
+                                </DropdownMenu>
+                            </Dropdown>
+                        {/if}
                     </th>
                 </tr>
                 </thead>
@@ -373,144 +387,139 @@
                         {/each}
                     </td>
                 </tr>
-                <tr>
-                    <td class="minimize-width">
-                        <span class="text-nowrap" id="estimation-size">
-                            <Emoji size="lg" value="{ EmojiEnum.size }" />
-                            <span>Size:</span>
-                        </span>
-                        <Tooltip target="estimation-size">Amount of work</Tooltip>
-                    <td colspan="2">
-                        {#each [
-                            SizeEnum.XS,
-                            SizeEnum.S,
-                            SizeEnum.M,
-                            SizeEnum.L,
-                            SizeEnum.XXL
-                        ] as value}
-                            <Button color="{ getColor(value) }"
-                                    size="sm"
-                                    outline
-                                    class="mb-1 { buttonStyle }"
-                                    active="{ size === value }"
-                                    on:click={() => size = size === value ? null : value}
-                            >
-                                { value }
-                            </Button>&nbsp;
-                        {/each}
-                    </td>
-                </tr>
-                <tr>
-                    <td class="minimize-width">
-                        <span class="text-nowrap" id="estimation-risk">
-                            <Emoji size="lg" value="{ EmojiEnum.risk }" />
-                            <span>Risk:</span>
-                        </span>
-                        <Tooltip target="estimation-risk">Unpredictable conditions</Tooltip>
-                    </td>
-                    <td colspan="2">
-                        {#each [
-                            RiskEnum.Safe,
-                            RiskEnum.Unclear,
-                            RiskEnum.Risky,
-                        ] as value}
-                            <Button color="{ getColor(value) }"
-                                    size="sm"
-                                    outline
-                                    class="mb-1 { buttonStyle }"
-                                    active="{ risk === value }"
-                                    on:click={() => risk = risk === value ? null : value}
-                            >
-                                { value }
-                            </Button>&nbsp;
-                        {/each}
-                    </td>
-                </tr>
-                <tr>
-                    <td class="minimize-width">
-                        <span class="text-nowrap" id="estimation-status">
-                            <Emoji size="lg" value="{ EmojiEnum.status }" />
-                            <span>Status:</span>
-                        </span>
-                        <Tooltip target="estimation-status">Needed preparations</Tooltip>
-                    </td>
-                    <td colspan="2">
-                        {#each [
-                            StatusEnum.Ready,
-                            StatusEnum.SolutionContractRequired,
-                            StatusEnum.NeedsResearch,
-                        ] as value}
-                            <Button color="{ getColor(value) }"
-                                    size="sm"
-                                    outline
-                                    class="mb-1 { buttonStyle }"
-                                    active="{ status === value }"
-                                    on:click={() => status = status === value ? null : value}
-                            >
-                                { value }
-                            </Button>&nbsp;
-                        {/each}
-                    </td>
-                </tr>
-                </tbody>
-                <tfoot>
-                <tr>
-                    <td colspan="3">
-                        {#if reactions}
+                {#if !boringMode}
+                    <tr>
+                        <td class="minimize-width">
+                            <span class="text-nowrap" id="estimation-size">
+                                <Emoji size="lg" value="{ EmojiEnum.size }" />
+                                <span>Size:</span>
+                            </span>
+                            <Tooltip target="estimation-size">Amount of work</Tooltip>
+                        <td colspan="2">
                             {#each [
-                                EmojiEnum.scared,
-                                EmojiEnum.unsure,
-                                EmojiEnum.loading,
-                                EmojiEnum.communications,
-                                EmojiEnum.doable,
-                                EmojiEnum.learn,
-                                EmojiEnum.newbie,
-                                EmojiEnum.refactoring,
-                                EmojiEnum.copypaste,
-                                EmojiEnum.legacy,
-                                EmojiEnum.coffee_break,
+                                SizeEnum.XS,
+                                SizeEnum.S,
+                                SizeEnum.M,
+                                SizeEnum.L,
+                                SizeEnum.XXL
                             ] as value}
-                                <Button color="link"
+                                <Button color="{ getColor(value) }"
+                                        size="sm"
                                         outline
-                                        class="shadow-none mb-1 py-sm-1 px-sm-2 { reactions.indexOf(value) !== -1 ? 'border border-secondary bg-light' : '' }"
-                                        style="padding: 0 0.2em"
-                                        disabled="{ reactions.length >= 3 && reactions.indexOf(value) === -1 }"
-                                        active="{ reactions.indexOf(value) !== -1 }"
-                                        on:click={() => {
-                                          const index = reactions.indexOf(value);
-                                          if (index === -1) {
-                                            reactions.push(value);
-                                          } else {
-                                            reactions.splice(index, 1);
-                                          }
-                                          reactions = reactions.slice(0, 3);
-                                        }}
+                                        class="mb-1 { buttonStyle }"
+                                        active="{ size === value }"
+                                        on:click={() => size = size === value ? null : value}
                                 >
-                                    <Emoji value="{ value }" /><div class="small reaction-name">{ value }</div>
+                                    { value }
                                 </Button>&nbsp;
                             {/each}
-                        {/if}
-                    </td>
-                </tr>
-                </tfoot>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="minimize-width">
+                            <span class="text-nowrap" id="estimation-risk">
+                                <Emoji size="lg" value="{ EmojiEnum.risk }" />
+                                <span>Risk:</span>
+                            </span>
+                            <Tooltip target="estimation-risk">Unpredictable conditions</Tooltip>
+                        </td>
+                        <td colspan="2">
+                            {#each [
+                                RiskEnum.Safe,
+                                RiskEnum.Unclear,
+                                RiskEnum.Risky,
+                            ] as value}
+                                <Button color="{ getColor(value) }"
+                                        size="sm"
+                                        outline
+                                        class="mb-1 { buttonStyle }"
+                                        active="{ risk === value }"
+                                        on:click={() => risk = risk === value ? null : value}
+                                >
+                                    { value }
+                                </Button>&nbsp;
+                            {/each}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="minimize-width">
+                            <span class="text-nowrap" id="estimation-status">
+                                <Emoji size="lg" value="{ EmojiEnum.status }" />
+                                <span>Status:</span>
+                            </span>
+                            <Tooltip target="estimation-status">Needed preparations</Tooltip>
+                        </td>
+                        <td colspan="2">
+                            {#each [
+                                StatusEnum.Ready,
+                                StatusEnum.SolutionContractRequired,
+                                StatusEnum.NeedsResearch,
+                            ] as value}
+                                <Button color="{ getColor(value) }"
+                                        size="sm"
+                                        outline
+                                        class="mb-1 { buttonStyle }"
+                                        active="{ status === value }"
+                                        on:click={() => status = status === value ? null : value}
+                                >
+                                    { value }
+                                </Button>&nbsp;
+                            {/each}
+                        </td>
+                    </tr>
+                {/if}
+                </tbody>
+                {#if !boringMode}
+                    <tfoot>
+                    <tr>
+                        <td colspan="3">
+                            {#if reactions}
+                                {#each [
+                                    EmojiEnum.scared,
+                                    EmojiEnum.unsure,
+                                    EmojiEnum.loading,
+                                    EmojiEnum.communications,
+                                    EmojiEnum.doable,
+                                    EmojiEnum.learn,
+                                    EmojiEnum.newbie,
+                                    EmojiEnum.refactoring,
+                                    EmojiEnum.copypaste,
+                                    EmojiEnum.legacy,
+                                    EmojiEnum.coffee_break,
+                                ] as value}
+                                    <Button color="link"
+                                            outline
+                                            class="shadow-none mb-1 py-sm-1 px-sm-2 { reactions.indexOf(value) !== -1 ? 'border border-secondary bg-light' : '' }"
+                                            style="padding: 0 0.2em"
+                                            disabled="{ reactions.length >= 3 && reactions.indexOf(value) === -1 }"
+                                            active="{ reactions.indexOf(value) !== -1 }"
+                                            on:click={() => {
+                                              const index = reactions.indexOf(value);
+                                              if (index === -1) {
+                                                reactions.push(value);
+                                              } else {
+                                                reactions.splice(index, 1);
+                                              }
+                                              reactions = reactions.slice(0, 3);
+                                            }}
+                                    >
+                                        <Emoji value="{ value }" /><div class="small reaction-name">{ value }</div>
+                                    </Button>&nbsp;
+                                {/each}
+                            {/if}
+                        </td>
+                    </tr>
+                    </tfoot>
+                {/if}
             </Table>
 
             <div class="d-flex mt-5 mb-3 align-items-center">
                 <span class="h3">Results</span>
                 &nbsp;&nbsp;&nbsp;
-                <Button color="primary" size="sm" outline class="{ buttonStyle }" on:click={() => sendUpdate(!roomData.show ? 'show' : 'hide') }>{ !roomData?.show ? 'Show' : 'Hide' }</Button>
-                &nbsp;&nbsp;&nbsp;
-                <Label for="compare-mode" class="mb-1">Compare mode</Label>
-                &nbsp;
-                <Input type="switch"
-                       id="compare-mode"
-                       bind:value="{ compareMode }"
-                       on:change={() => compareMode = !compareMode}
-                       class="me-auto"
-                />
+                <Button color="primary" size="sm" outline class="me-auto { buttonStyle }" on:click={() => sendUpdate(!roomData.show ? 'show' : 'hide') }>{ !roomData?.show ? 'Show' : 'Hide' }</Button>
                 &nbsp;
                 <div class="d-none d-md-inline-block">
-                    <Button color="secondary" size="sm" outline class="{ buttonStyle }" on:click={() => sendUpdate('delete') }>Delete estimates</Button>
+                    <Button color="secondary" size="sm" outline class="{ buttonStyle }" on:click={() => sendUpdate('reset') }>Reset</Button>
                     &nbsp;
                     <Button color="secondary" size="sm" outline class="{ buttonStyle }" on:click={() => sendUpdate('clear') }>Clear room</Button>
                 </div>
@@ -519,9 +528,9 @@
                 <thead>
                 <tr>
                     <th class="minimize-width"></th>
-                    <th colspan="3" class="{ compareMode ? 'minimize-width' : '' }">Name</th>
-                    <th class="{ !compareMode ? 'minimize-width' : '' }">Estimation</th>
-                    {#if !compareMode}
+                    <th colspan="3" class="{ boringMode ? 'minimize-width' : '' }">Name</th>
+                    <th class="{ !boringMode ? 'minimize-width' : '' }">Estimation</th>
+                    {#if !boringMode}
                         <th class="d-none d-md-table-cell">Details</th>
                     {/if}
                 </tr>
@@ -533,10 +542,10 @@
                             <td class="minimize-width">
                                 <Icon name="circle-fill { item.profileId === profileId ? 'fs-4' : 'small' }" class="text-{ getColor(item.online) }" />
                             </td>
-                            <td class="minimize-width">
+                            <td class="minimize-width { boringMode ? 'p-0' : ''}">
                                 <div class="d-block d-md-none profile-name fw-light">{ item.profileName }</div>
-                                <Avatar class="d-none d-md-block" value="{ item.profileAvatar }" />
-                                {#if !compareMode}
+                                {#if !boringMode}
+                                    <Avatar class="d-none d-md-block" value="{ item.profileAvatar }" />
                                     <div class="d-inline-block d-md-none mt-1">
                                         <Avatar size="sm" class="p-1" value="{ item.profileAvatar }" />
                                         {#if roomData.show || item.profileId === profileId}
@@ -553,24 +562,23 @@
                                 </div>
                             </td>
                             <td class="p-0 p-md-2 minimize-width">
-                                {#if !compareMode}
+                                {#if !boringMode}
                                     <div class="d-none d-md-table-cell">
                                         {#if roomData.show || item.profileId === profileId}
                                             {#each item.reactions as reaction}
                                                 <Emoji class="p-1" value="{ reaction }" />
                                             {/each}
                                         {/if}
-
                                     </div>
                                 {/if}
                             </td>
-                            <td class="{ !compareMode ? 'minimize-width' : '' }">
+                            <td class="{ !boringMode ? 'minimize-width' : '' }">
                                 {#if roomData.show || item.profileId === profileId}
                                     <span class="fs-4">{ item.sp ?? '-' }</span>
                                 {:else}
                                     <span class="fs-4">X</span>
                                 {/if}
-                                {#if !compareMode && (roomData.show || item.profileId === profileId)}
+                                {#if !boringMode && (roomData.show || item.profileId === profileId)}
                                     <div class="d-block d-md-none text-break text-wrap">
                                         {#if null !== item.size}
                                             <span class="text-nowrap small">
@@ -596,7 +604,7 @@
                                     </div>
                                 {/if}
                             </td>
-                            {#if !compareMode}
+                            {#if !boringMode}
                                 <td class="d-none d-md-table-cell">
                                     {#if roomData.show || item.profileId === profileId}
                                         {#if null !== item.size}
@@ -630,7 +638,7 @@
             </Table>
 
             <div class="d-block d-md-none mt-5">
-                <Button color="secondary" size="sm" outline class="align-self-baseline { buttonStyle }" on:click={() => sendUpdate('delete') }>Delete estimates</Button>
+                <Button color="secondary" size="sm" outline class="align-self-baseline { buttonStyle }" on:click={() => sendUpdate('reset') }>Reset</Button>
                 &nbsp;
                 <Button color="secondary" size="sm" outline class="align-self-baseline { buttonStyle }" on:click={() => sendUpdate('clear') }>Clear room</Button>
             </div>
