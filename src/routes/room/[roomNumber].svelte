@@ -22,6 +22,7 @@
         DropdownMenu,
         DropdownItem,
         Tooltip,
+        Label,
         Input,
         Popover,
         Alert,
@@ -246,6 +247,7 @@
     }
 
     let buttonStyle = 'shadow-none py-0 py-md-1 px-2'
+    let compareMode = false
 </script>
 
 <style>
@@ -277,7 +279,7 @@
 <Styles />
 
 <div class="container">
-    <Row class="pt-5">
+    <Row class="pt-3 pt-md-5">
         <Col>
             <span class="h3">
                 <span>Room #</span>
@@ -492,15 +494,24 @@
                 </tfoot>
             </Table>
 
-            <div class="d-flex mt-5 mb-3">
+            <div class="d-flex mt-5 mb-3 align-items-center">
                 <span class="h3">Results</span>
                 &nbsp;&nbsp;&nbsp;
-                <Button color="primary" size="sm" outline class="me-auto align-self-baseline { buttonStyle }" on:click={() => sendUpdate(!roomData.show ? 'show' : 'hide') }>{ !roomData?.show ? 'Show' : 'Hide' }</Button>
+                <Button color="primary" size="sm" outline class="{ buttonStyle }" on:click={() => sendUpdate(!roomData.show ? 'show' : 'hide') }>{ !roomData?.show ? 'Show' : 'Hide' }</Button>
+                &nbsp;&nbsp;&nbsp;
+                <Label for="compare-mode" class="mb-1">Compare mode</Label>
+                &nbsp;
+                <Input type="switch"
+                       id="compare-mode"
+                       bind:value="{ compareMode }"
+                       on:change={() => compareMode = !compareMode}
+                       class="me-auto"
+                />
                 &nbsp;
                 <div class="d-none d-md-inline-block">
-                    <Button color="secondary" size="sm" outline class="align-self-baseline { buttonStyle }" on:click={() => sendUpdate('delete') }>Delete estimates</Button>
+                    <Button color="secondary" size="sm" outline class="{ buttonStyle }" on:click={() => sendUpdate('delete') }>Delete estimates</Button>
                     &nbsp;
-                    <Button color="secondary" size="sm" outline class="align-self-baseline { buttonStyle }" on:click={() => sendUpdate('clear') }>Clear room</Button>
+                    <Button color="secondary" size="sm" outline class="{ buttonStyle }" on:click={() => sendUpdate('clear') }>Clear room</Button>
                 </div>
             </div>
             <Table class="align-middle">
@@ -509,7 +520,9 @@
                     <th class="minimize-width"></th>
                     <th colspan="3">Name</th>
                     <th class="minimize-width">Estimation</th>
-                    <th class="d-none d-md-table-cell">Details</th>
+                    {#if !compareMode}
+                        <th class="d-none d-md-table-cell">Details</th>
+                    {/if}
                 </tr>
                 </thead>
                 <tbody>
@@ -521,15 +534,17 @@
                             </td>
                             <td class="minimize-width">
                                 <div class="d-block d-md-none profile-name fw-light">{ item.profileName }</div>
-                                <Avatar class="d-none d-md-block" value="{ item.profileAvatar }" />
-                                <div class="d-inline-block d-md-none mt-1">
-                                    <Avatar size="sm" class="p-1" value="{ item.profileAvatar }" />
-                                    {#if roomData.show || item.profileId === profileId}
-                                        {#each item.reactions as reaction}
-                                            <Emoji class="p-1" value="{ reaction }" />
-                                        {/each}
-                                    {/if}
-                                </div>
+                                {#if !compareMode}
+                                    <Avatar class="d-none d-md-block" value="{ item.profileAvatar }" />
+                                    <div class="d-inline-block d-md-none mt-1">
+                                        <Avatar size="sm" class="p-1" value="{ item.profileAvatar }" />
+                                        {#if roomData.show || item.profileId === profileId}
+                                            {#each item.reactions as reaction}
+                                                <Emoji class="p-1" value="{ reaction }" />
+                                            {/each}
+                                        {/if}
+                                    </div>
+                                {/if}
                             </td>
                             <td class="p-0 p-md-2">
                                 <div class="d-none d-md-table-cell">
@@ -537,13 +552,16 @@
                                 </div>
                             </td>
                             <td class="p-0 p-md-2">
-                                <div class="d-none d-md-table-cell">
-                                    {#if roomData.show || item.profileId === profileId}
-                                        {#each item.reactions as reaction}
-                                            <Emoji class="p-1" value="{ reaction }" />
-                                        {/each}
-                                    {/if}
-                                </div>
+                                {#if !compareMode}
+                                    <div class="d-none d-md-table-cell">
+                                        {#if roomData.show || item.profileId === profileId}
+                                            {#each item.reactions as reaction}
+                                                <Emoji class="p-1" value="{ reaction }" />
+                                            {/each}
+                                        {/if}
+
+                                    </div>
+                                {/if}
                             </td>
                             <td class="minimize-width">
                                 {#if roomData.show || item.profileId === profileId}
@@ -551,55 +569,59 @@
                                 {:else}
                                     <span class="fs-4">X</span>
                                 {/if}
-                                <div class="d-block d-md-none text-break text-wrap">
+                                {#if !compareMode}
+                                    <div class="d-block d-md-none text-break text-wrap">
+                                        <span class="text-nowrap small">
+                                            {#if roomData.show || item.profileId === profileId}
+                                                <span class="pe-1">Size:</span>
+                                                <span class="text-{ getColor(item.size) }">{ item.size ?? '?' }</span>
+                                            {/if}
+                                        </span>
+
+                                        {#if null !== item.risk && (roomData.show || item.profileId === profileId)}
+                                            <span class="text-muted small pe-1"></span>
+                                            <span class="text-nowrap small text-{ getColor(item.risk) }">{ item.risk ?? '' }</span>
+                                        {/if}
+
+                                        {#if null !== item.status && (roomData.show || item.profileId === profileId)}
+                                            <span class="text-muted small pe-1"></span>
+                                            <span class="text-nowrap small text-{ getColor(item.status) }">{ item.status ?? '' }</span>
+                                        {/if}
+
+                                        {#if null !== (item.calculated ?? null) && (roomData.show || item.profileId === profileId)}
+                                            <span class="text-muted small pe-1">/</span>
+                                            <span class="text-nowrap small text-muted" title="{ item.calculatedInfo ?? ''}"><Icon name="calculator" />&nbsp;{ item.calculated ?? ''}</span>
+                                        {/if}
+                                    </div>
+                                {/if}
+                            </td>
+                            {#if !compareMode}
+                                <td class="d-none d-md-table-cell">
                                     <span class="text-nowrap small">
+                                        <span class="pe-1">Size:</span>
                                         {#if roomData.show || item.profileId === profileId}
-                                            <span class="pe-1">Size:</span>
                                             <span class="text-{ getColor(item.size) }">{ item.size ?? '?' }</span>
+                                        {:else}
+                                            <span class="text-secondary">X</span>
                                         {/if}
                                     </span>
 
                                     {#if null !== item.risk && (roomData.show || item.profileId === profileId)}
-                                        <span class="text-muted small pe-1"></span>
+                                        <span class="text-muted small px-1">/</span>
                                         <span class="text-nowrap small text-{ getColor(item.risk) }">{ item.risk ?? '' }</span>
                                     {/if}
 
                                     {#if null !== item.status && (roomData.show || item.profileId === profileId)}
-                                        <span class="text-muted small pe-1"></span>
+                                        <span class="text-muted small px-1">/</span>
                                         <span class="text-nowrap small text-{ getColor(item.status) }">{ item.status ?? '' }</span>
                                     {/if}
 
                                     {#if null !== (item.calculated ?? null) && (roomData.show || item.profileId === profileId)}
-                                        <span class="text-muted small pe-1">/</span>
-                                        <span class="text-nowrap small text-muted" title="{ item.calculatedInfo ?? ''}"><Icon name="calculator" />&nbsp;{ item.calculated ?? ''}</span>
+                                        <span class="text-muted small px-1">/</span>
+                                        <span class="text-nowrap fs-5 text-muted" title="{ item.calculatedInfo ?? ''}"><Icon name="calculator" />&nbsp;{ item.calculated ?? ''}</span>
                                     {/if}
-                                </div>
-                            </td>
-                            <td class="d-none d-md-table-cell">
-                                <span class="text-nowrap small">
-                                    <span class="pe-1">Size:</span>
-                                    {#if roomData.show || item.profileId === profileId}
-                                        <span class="text-{ getColor(item.size) }">{ item.size ?? '?' }</span>
-                                    {:else}
-                                        <span class="text-secondary">X</span>
-                                    {/if}
-                                </span>
-
-                                {#if null !== item.risk && (roomData.show || item.profileId === profileId)}
-                                    <span class="text-muted small px-1">/</span>
-                                    <span class="text-nowrap small text-{ getColor(item.risk) }">{ item.risk ?? '' }</span>
-                                {/if}
-
-                                {#if null !== item.status && (roomData.show || item.profileId === profileId)}
-                                    <span class="text-muted small px-1">/</span>
-                                    <span class="text-nowrap small text-{ getColor(item.status) }">{ item.status ?? '' }</span>
-                                {/if}
-
-                                {#if null !== (item.calculated ?? null) && (roomData.show || item.profileId === profileId)}
-                                    <span class="text-muted small px-1">/</span>
-                                    <span class="text-nowrap fs-5 text-muted" title="{ item.calculatedInfo ?? ''}"><Icon name="calculator" />&nbsp;{ item.calculated ?? ''}</span>
-                                {/if}
-                            </td>
+                                </td>
+                            {/if}
                         </tr>
                     {/each}
                 {/if}
