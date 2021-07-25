@@ -21,11 +21,14 @@
         DropdownToggle,
         DropdownMenu,
         DropdownItem,
-        Tooltip,
         Label,
         Input,
         Popover,
         Alert,
+        Modal,
+        ModalBody,
+        ModalFooter,
+        ModalHeader,
         Styles
     } from 'sveltestrap'
     import Avatar from '$lib/Avatar/index.svelte'
@@ -286,6 +289,9 @@
     }
 
     let buttonStyle = 'shadow-none py-0 py-md-1 px-2'
+
+    let help = false
+    let helpToggle = () => help = !help
 </script>
 
 <style>
@@ -330,7 +336,13 @@
                        style="width: 90px"
                 />
             </span>
-            <Button color="link" size="sm" class="align-text-bottom shadow-none" id="share-room" on:click={() => navigator.clipboard.writeText(window.location.href)}><Icon name="share" /></Button>
+            <Button color="link"
+                    size="sm"
+                    class="align-text-bottom shadow-none"
+                    id="share-room"
+                    on:click={() => navigator.clipboard.writeText(window.location.href)}>
+                <Icon name="share" />
+            </Button>
             <Popover placement="right" target="share-room" dismissible>
                 <div class="text-nowrap text-truncate">
                     Link copied: <a href="{ window.location.href }" target="_blank">{ window.location.href }</a>
@@ -402,11 +414,10 @@
                 <tbody>
                 <tr class="align-middle">
                     <td class="minimize-width">
-                        <span class="text-nowrap" id="estimation-rate">
+                        <span class="text-nowrap">
                             <Emoji size="lg" value="{ EmojiEnum.vote }" />
                             <span>SP:</span>
                         </span>
-                        <Tooltip target="estimation-rate">Usual story points</Tooltip>
                     </td>
                     <td colspan="2">
                         {#each Object.values(StoryPointEnum) as value}
@@ -425,11 +436,10 @@
                 {#if !boringMode}
                     <tr>
                         <td class="minimize-width">
-                            <span class="text-nowrap" id="estimation-size">
+                            <span class="text-nowrap">
                                 <Emoji size="lg" value="{ EmojiEnum.size }" />
                                 <span>Size:</span>
                             </span>
-                            <Tooltip target="estimation-size">Amount of work</Tooltip>
                         <td colspan="2">
                             {#each [
                                 SizeEnum.XS,
@@ -452,11 +462,11 @@
                     </tr>
                     <tr>
                         <td class="minimize-width">
-                            <span class="text-nowrap" id="estimation-risk">
+                            <span class="text-nowrap">
                                 <Emoji size="lg" value="{ EmojiEnum.risk }" />
                                 <span>Risk:</span>
                             </span>
-                            <Tooltip target="estimation-risk">Unpredictable conditions</Tooltip>
+
                         </td>
                         <td colspan="2">
                             {#each [
@@ -478,11 +488,10 @@
                     </tr>
                     <tr>
                         <td class="minimize-width">
-                            <span class="text-nowrap" id="estimation-status">
+                            <span class="text-nowrap">
                                 <Emoji size="lg" value="{ EmojiEnum.status }" />
                                 <span>Status:</span>
                             </span>
-                            <Tooltip target="estimation-status">Needed preparations</Tooltip>
                         </td>
                         <td colspan="2">
                             {#each [
@@ -682,8 +691,66 @@
 </div>
 
 <footer class="footer mt-auto py-3 bg-light">
-    <div class="container" style="font-size: 0.8em">
+    <div class="container">
         <div>
+            <Button color="link"
+                    size="sm"
+                    class="shadow-none ps-0 me-3"
+                    id="share-room"
+                    on:click={helpToggle}>
+                <Icon name="question-circle" class="align-middle fs-1 me-2" /><span class="align-middle">How it works?</span>
+            </Button>
+        </div>
+
+        <Modal isOpen={help} toggle={helpToggle} size="xl">
+            <ModalHeader toggle={helpToggle}>How it works</ModalHeader>
+            <ModalBody>
+                <p>Story points typically based on:</p>
+                <ul>
+                    <li>The amount of work</li>
+                    <li>The complexity of the work</li>
+                    <li>Any risk or uncertainty in doing the work</li>
+                </ul>
+
+                <h6><Emoji value="{ EmojiEnum.vote }" />&nbsp;SP</h6>
+                <p>Regular story points. Select one and compare you choice with other team members. Take into account all aspects described above.</p>
+
+                <h4>Detailing</h4>
+                <p>In addition to well-known SP, your team can evaluate each factor individually.</p>
+
+                <h6><Emoji value="{ EmojiEnum.size }" />&nbsp;Size</h6>
+                <p>Amount of work to do. How much lines of code it needs to write, or use cases to check.</p>
+
+                <h6><Emoji value="{ EmojiEnum.risk }" />&nbsp;Risk</h6>
+                <p>Unpredictable conditions, which you are afraid of.</p>
+
+                <h6><Emoji value="{ EmojiEnum.status }" />&nbsp;Status</h6>
+                <p>Readiness of task. Does it need preparations or additional effort from you.</p>
+
+                <h6>
+                    <Emoji value="{ EmojiEnum.coffee_break }" />
+                    <Emoji value="{ EmojiEnum.doable }" />
+                    <Emoji value="{ EmojiEnum.scared }" />
+                    &nbsp;Reactions
+                </h6>
+                <p>Let team know about your vision of task and feelings about it.</p>
+
+                <h4>Calculation <Icon name="calculator" /></h4>
+                <p>Each factor has its own impact on calculated SP value:</p>
+                <ul>
+                    <li>Size: XS (0), S (+1), M (+2), L (+3), XXL (+4)</li>
+                    <li>Risk: Safe (0), Unclear (+1), Risky (+2)</li>
+                    <li>Status: Ready (0), Solution/Contract required (+1), Needs research (+3)</li>
+                </ul>
+                <p>Note: this is number of grades on SP scale. +5 stands for 8 SP.</p>
+
+            </ModalBody>
+            <ModalFooter>
+                <Button color="secondary" on:click={helpToggle}>Got it</Button>
+            </ModalFooter>
+        </Modal>
+
+        <div style="font-size: 0.8em">
             Icons made by
 
             <a href="https://www.freepik.com" title="Freepik">Freepik</a> /
