@@ -478,11 +478,11 @@
                                         on:click={() => {
                                           const index = reactions.indexOf(value);
                                           if (index === -1) {
-                                            reactions.push(value);1
+                                            reactions.push(value);
                                           } else {
-                                            reactions.splice(index, 1)
+                                            reactions.splice(index, 1);
                                           }
-                                          reactions = reactions;
+                                          reactions = reactions.slice(0, 3);
                                         }}
                                 >
                                     <Emoji value="{ value }" /><div class="small reaction-name">{ value }</div>
@@ -546,12 +546,12 @@
                                     </div>
                                 {/if}
                             </td>
-                            <td class="p-0 p-md-2 { compareMode ? 'minimize-width' : '' }">
+                            <td class="p-0 p-md-2 minimize-width">
                                 <div class="d-none d-md-table-cell">
                                     <span class="profile-name fw-light">{ item.profileName }</span>
                                 </div>
                             </td>
-                            <td class="p-0 p-md-2">
+                            <td class="p-0 p-md-2 minimize-width">
                                 {#if !compareMode}
                                     <div class="d-none d-md-table-cell">
                                         {#if roomData.show || item.profileId === profileId}
