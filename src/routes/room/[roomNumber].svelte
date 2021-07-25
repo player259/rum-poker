@@ -596,28 +596,30 @@
                                     </div>
                                 {/if}
                             </td>
-                            {#if !compareMode && (roomData.show || item.profileId === profileId)}
+                            {#if !compareMode}
                                 <td class="d-none d-md-table-cell">
-                                    {#if null !== item.size}
-                                        <span class="text-nowrap small">
-                                            <span>Size:</span>&nbsp;
-                                            <span class="text-{ getColor(item.size) }">{ item.size ?? '' }</span>
-                                        </span>
-                                    {/if}
+                                    {#if roomData.show || item.profileId === profileId}
+                                        {#if null !== item.size}
+                                            <span class="text-nowrap small">
+                                                <span>Size:</span>&nbsp;
+                                                <span class="text-{ getColor(item.size) }">{ item.size ?? '' }</span>
+                                            </span>
+                                        {/if}
 
-                                    {#if null !== item.risk}
-                                        {#if null !== item.size}<span class="text-muted small px-1">/</span>{/if}
-                                        <span class="text-nowrap small text-{ getColor(item.risk) }">{ item.risk ?? '' }</span>
-                                    {/if}
+                                        {#if null !== item.risk}
+                                            {#if null !== item.size}<span class="text-muted small px-1">/</span>{/if}
+                                            <span class="text-nowrap small text-{ getColor(item.risk) }">{ item.risk ?? '' }</span>
+                                        {/if}
 
-                                    {#if null !== item.status}
-                                        {#if null !== item.risk || null !== item.size}<span class="text-muted small px-1">/</span>{/if}
-                                        <span class="text-nowrap small text-{ getColor(item.status) }">{ item.status ?? '' }</span>
-                                    {/if}
+                                        {#if null !== item.status}
+                                            {#if null !== item.risk || null !== item.size}<span class="text-muted small px-1">/</span>{/if}
+                                            <span class="text-nowrap small text-{ getColor(item.status) }">{ item.status ?? '' }</span>
+                                        {/if}
 
-                                    {#if null !== sp && null !== (item.calculated ?? null)}
-                                        {#if null !== item.risk || null !== item.size || null !== item.status}<span class="text-muted small px-1">/</span>{/if}
-                                        <span class="text-nowrap fs-5 text-muted" title="{ item.calculatedInfo ?? ''}"><Icon name="calculator" />&nbsp;{ item.calculated ?? ''}</span>
+                                        {#if null !== sp && null !== (item.calculated ?? null)}
+                                            {#if null !== item.risk || null !== item.size || null !== item.status}<span class="text-muted small px-1">/</span>{/if}
+                                            <span class="text-nowrap fs-5 text-muted" title="{ item.calculatedInfo ?? ''}"><Icon name="calculator" />&nbsp;{ item.calculated ?? ''}</span>
+                                        {/if}
                                     {/if}
                                 </td>
                             {/if}
