@@ -518,8 +518,8 @@
                 <thead>
                 <tr>
                     <th class="minimize-width"></th>
-                    <th colspan="3">Name</th>
-                    <th class="minimize-width">Estimation</th>
+                    <th colspan="3" class="{ compareMode ? 'minimize-width' : '' }">Name</th>
+                    <th class="{ !compareMode ? 'minimize-width' : '' }">Estimation</th>
                     {#if !compareMode}
                         <th class="d-none d-md-table-cell">Details</th>
                     {/if}
@@ -534,8 +534,8 @@
                             </td>
                             <td class="minimize-width">
                                 <div class="d-block d-md-none profile-name fw-light">{ item.profileName }</div>
+                                <Avatar class="d-none d-md-block" value="{ item.profileAvatar }" />
                                 {#if !compareMode}
-                                    <Avatar class="d-none d-md-block" value="{ item.profileAvatar }" />
                                     <div class="d-inline-block d-md-none mt-1">
                                         <Avatar size="sm" class="p-1" value="{ item.profileAvatar }" />
                                         {#if roomData.show || item.profileId === profileId}
@@ -546,7 +546,7 @@
                                     </div>
                                 {/if}
                             </td>
-                            <td class="p-0 p-md-2">
+                            <td class="p-0 p-md-2 { compareMode ? 'minimize-width' : '' }">
                                 <div class="d-none d-md-table-cell">
                                     <span class="profile-name fw-light">{ item.profileName }</span>
                                 </div>
@@ -563,7 +563,7 @@
                                     </div>
                                 {/if}
                             </td>
-                            <td class="minimize-width">
+                            <td class="{ !compareMode ? 'minimize-width' : '' }">
                                 {#if roomData.show || item.profileId === profileId}
                                     <span class="fs-4">{ item.sp ?? '-' }</span>
                                 {:else}

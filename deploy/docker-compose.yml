@@ -24,6 +24,6 @@ services:
         build:
             context: ../
             dockerfile: prod.dockerfile
-        hostname: app
-        container_name: app
+        hostname: frontend
+        container_name: frontend
         restart: always
