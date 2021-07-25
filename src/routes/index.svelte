@@ -63,13 +63,17 @@
 
 </script>
 
+<svelte:head>
+    <title>Rum-poker</title>
+</svelte:head>
+
 <Styles />
 
 <div class="container">
     <Row class="pt-5">
         <Col>
             <div class="mx-auto mt-5 h3 text-center">Welcome to</div>
-            <div class="mx-auto mb-5 h1 text-center">RUM-POKER.online</div>
+            <div class="mx-auto mb-5 h1 text-center"><span class="fs-6">sc</span>RUM-POKER.online</div>
 
             <Button color="primary" size="lg" outline class="d-block mx-auto shadow-none h1" on:click={() => createRoom()}>Create new room</Button>
         </Col>

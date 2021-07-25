@@ -315,6 +315,10 @@
     let helpToggle = () => help = !help
 </script>
 
+<svelte:head>
+    <title>Rum-poker Room #{roomNumber}</title>
+</svelte:head>
+
 <style>
     .minimize-width {
         width: 0.01%;
