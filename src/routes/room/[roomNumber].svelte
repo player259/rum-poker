@@ -474,6 +474,7 @@
                                         outline
                                         class="shadow-none mb-1 py-sm-1 px-sm-2 { reactions.indexOf(value) !== -1 ? 'border border-secondary bg-light' : '' }"
                                         style="padding: 0 0.2em"
+                                        disabled="{ reactions.length >= 3 && reactions.indexOf(value) === -1 }"
                                         active="{ reactions.indexOf(value) !== -1 }"
                                         on:click={() => {
                                           const index = reactions.indexOf(value);
