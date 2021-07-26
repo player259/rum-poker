@@ -39,7 +39,7 @@ function buildRoomResponse(room, profileId) {
                 case 'S': return 1
                 case 'M': return 2
                 case 'L': return 3
-                case 'XXL': return 4
+                case 'XXL': return 7
                 case 'Safe': return 0
                 case 'Unclear': return 1
                 case 'Risky': return 2
@@ -51,7 +51,7 @@ function buildRoomResponse(room, profileId) {
         }
 
         const spScale = [0, 1, 2, 3, 5, 8, 13, 20, 40, 100]
-        data.calculated = spScale[getOffset(data.size) + getOffset(data.risk) + getOffset(data.status)]
+        data.calculated = spScale[Math.min(spScale.length - 1, getOffset(data.size) + getOffset(data.risk) + getOffset(data.status))]
         data.calculatedInfo = 'Size +' + getOffset(data.size) + '\nRisk +' + getOffset(data.risk) + '\nStatus +' + getOffset(data.status);
 
         const busy3min = data.online === 'Busy' && data.updatedAt + 180000 < Date.now()

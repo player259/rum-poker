@@ -160,7 +160,7 @@
                     case SizeEnum.S: return 1
                     case SizeEnum.M: return 2
                     case SizeEnum.L: return 3
-                    case SizeEnum.XXL: return 4
+                    case SizeEnum.XXL: return 7
                     case RiskEnum.Safe: return 0
                     case RiskEnum.Unclear: return 1
                     case RiskEnum.Risky: return 2
@@ -171,8 +171,7 @@
                 return 0
             }
             const spScale = [0, 1, 2, 3, 5, 8, 13, 20, 40, 100]
-            roomData.data[index].calculated = spScale[getOffset(size) + getOffset(risk) + getOffset(status)]
-
+            roomData.data[index].calculated = spScale[Math.min(spScale.length - 1, getOffset(size) + getOffset(risk) + getOffset(status))]
             roomData = roomData
         }
 
@@ -763,7 +762,7 @@
                 <h4>Calculation <Icon name="calculator" /></h4>
                 <p>Each factor has its own impact on calculated SP value:</p>
                 <ul>
-                    <li>Size: XS (0), S (+1), M (+2), L (+3), XXL (+4)</li>
+                    <li>Size: XS (0), S (+1), M (+2), L (+3), XXL (+7)</li>
                     <li>Risk: Safe (0), Unclear (+1), Risky (+2)</li>
                     <li>Status: Ready (0), Solution/Contract required (+1), Needs research (+3)</li>
                 </ul>
