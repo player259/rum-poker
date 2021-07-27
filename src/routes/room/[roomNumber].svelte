@@ -184,6 +184,11 @@
                 roomData.show = false
                 break;
             case 'reset':
+                sp = null
+                size = null
+                risk = null
+                status = null
+                reactions = []
                 roomData.data.forEach(item => {
                     item.sp = null
                     item.size = null
