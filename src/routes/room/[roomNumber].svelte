@@ -158,14 +158,14 @@
                 switch (value) {
                     case SizeEnum.XS: return 0
                     case SizeEnum.S: return 1
-                    case SizeEnum.M: return 2
-                    case SizeEnum.L: return 3
+                    case SizeEnum.M: return 3
+                    case SizeEnum.L: return 5
                     case SizeEnum.XXL: return 7
                     case RiskEnum.Safe: return 0
-                    case RiskEnum.Unclear: return 1
-                    case RiskEnum.Risky: return 2
+                    case RiskEnum.Risky50: return 1
+                    case RiskEnum.Risky: return 3
                     case StatusEnum.Ready: return 0
-                    case StatusEnum.SolutionContractRequired: return 1
+                    case StatusEnum.NeedsClarification: return 2
                     case StatusEnum.NeedsResearch: return 3
                 }
                 return 0
@@ -317,6 +317,15 @@
 
     let help = false
     let helpToggle = () => help = !help
+
+    function showItem(item) {
+        return roomData.show || item.profileId === profileId
+    }
+
+    let enterName = false
+    let enterNameValue = ''
+
+    $: ready && (() => enterName = null === profileName || '' === profileName)()
 </script>
 
 <svelte:head>
@@ -350,6 +359,16 @@
 </style>
 
 <Styles />
+
+<Modal isOpen={enterName}>
+    <ModalHeader>Enter you name</ModalHeader>
+    <ModalBody>
+        <Input bind:value="{ enterNameValue }" placeholder="Enter your name" class="fw-light { '' === profileName ? 'border border-danger' : '' }" />
+    </ModalBody>
+    <ModalFooter>
+        <Button color="success" disabled={ '' === enterNameValue } on:click={ () => { enterName = '' !== enterNameValue; profileName = enterName ? enterNameValue : profileName; enterNameValue = ''; } }>Submit</Button>
+    </ModalFooter>
+</Modal>
 
 <div class="container">
     <Row class="pt-3 pt-md-5">
@@ -500,7 +519,7 @@
                         <td colspan="2">
                             {#each [
                                 RiskEnum.Safe,
-                                RiskEnum.Unclear,
+                                RiskEnum.Risky50,
                                 RiskEnum.Risky,
                             ] as value}
                                 <Button color="{ getColor(value) }"
@@ -525,7 +544,7 @@
                         <td colspan="2">
                             {#each [
                                 StatusEnum.Ready,
-                                StatusEnum.SolutionContractRequired,
+                                StatusEnum.NeedsClarification,
                                 StatusEnum.NeedsResearch,
                             ] as value}
                                 <Button color="{ getColor(value) }"
@@ -613,7 +632,7 @@
                     {#each roomData.data as item}
                         <tr class="{ item.profileId === profileId ? 'bg-light' : '' }">
                             <td class="minimize-width">
-                                <Icon name="circle-fill { item.profileId === profileId ? 'fs-4' : 'small' }" class="text-{ getColor(item.online) }" />
+                                <Icon name="circle-fill" class="text-{ getColor(item.online) } { item.profileId === profileId ? 'fs-4' : 'small' }" />
                             </td>
                             <td class="minimize-width { boringMode ? 'p-0' : ''}">
                                 <div class="d-block d-md-none profile-name fw-light">{ item.profileName }</div>
@@ -646,61 +665,71 @@
                                 {/if}
                             </td>
                             <td class="{ !boringMode ? 'minimize-width' : '' }">
-                                {#if roomData.show || item.profileId === profileId}
-                                    <span class="fs-4">{ item.sp ?? '-' }</span>
-                                {:else}
-                                    <span class="fs-4">X</span>
-                                {/if}
-                                {#if !boringMode && (roomData.show || item.profileId === profileId)}
+                                <span class="fs-4">
+                                    {#if showItem(item) }
+                                        { item.sp ?? '-' }
+                                    {:else}
+                                        {#if null !== item.sp }
+                                            <Icon name="flag-fill" class="text-secondary" />
+                                        {:else}
+                                            <Icon name="hourglass-split" class="text-secondary" />
+                                        {/if}
+                                    {/if}
+                                </span>
+                                {#if !boringMode}
                                     <div class="d-block d-md-none text-break text-wrap">
                                         {#if null !== item.size}
                                             <span class="text-nowrap small">
-                                                <span>Size:</span>&nbsp;
-                                                <span class="text-{ getColor(item.size) }">{ item.size ?? '' }</span>
+                                                {#if showItem(item) }<span>Size:</span>{/if}
+                                                <span class="text-{ getColor(showItem(item) ? item.size : null) }">{ (showItem(item) ? item.size : null) ?? '-' }</span>
                                             </span>
                                         {/if}
 
                                         {#if null !== item.risk}
                                             {#if null !== item.size}<span class="text-muted small pe-1"></span>{/if}
-                                            <span class="text-nowrap small text-{ getColor(item.risk) }">{ item.risk ?? '' }</span>
+                                            <span class="text-nowrap small text-{ getColor(showItem(item) ? item.risk : null) }">{ (showItem(item) ? item.risk : null) ?? '-' }</span>
                                         {/if}
 
                                         {#if null !== item.status}
                                             {#if null !== item.risk || null !== item.size}<span class="text-muted small pe-1"></span>{/if}
-                                            <span class="text-nowrap small text-{ getColor(item.status) }">{ item.status ?? '' }</span>
+                                            <span class="text-nowrap small text-{ getColor(showItem(item) ? item.status : null) }">{ (showItem(item) ? item.status : null) ?? '-' }</span>
                                         {/if}
 
                                         {#if (null !== item.risk || null !== item.size || null !== item.status) && null !== (item.calculated ?? null)}
-                                            <span class="text-muted small pe-1">/</span>
-                                            <span class="text-nowrap small text-muted" title="{ item.calculatedInfo ?? ''}"><Icon name="calculator" />&nbsp;{ item.calculated ?? ''}</span>
+                                            <span class="text-muted small pe-1"></span>
+                                            <span class="text-nowrap small text-muted" title="{ item.calculatedInfo ?? ''}">
+                                                {#if showItem(item) }<Icon name="calculator" />{/if}
+                                                { (showItem(item) ? item.calculated : null) ?? '-' }
+                                            </span>
                                         {/if}
                                     </div>
                                 {/if}
                             </td>
                             {#if !boringMode}
                                 <td class="d-none d-md-table-cell">
-                                    {#if roomData.show || item.profileId === profileId}
-                                        {#if null !== item.size}
-                                            <span class="text-nowrap small">
-                                                <span>Size:</span>&nbsp;
-                                                <span class="text-{ getColor(item.size) }">{ item.size ?? '' }</span>
-                                            </span>
-                                        {/if}
+                                    {#if null !== item.size}
+                                        <span class="text-nowrap small">
+                                            {#if showItem(item) }<span>Size:</span>{/if}
+                                            <span class="text-{ getColor(showItem(item) ? item.size : null) }">{ (showItem(item) ? item.size : null) ?? '-' }</span>
+                                        </span>
+                                    {/if}
 
-                                        {#if null !== item.risk}
-                                            {#if null !== item.size}<span class="text-muted small px-1">/</span>{/if}
-                                            <span class="text-nowrap small text-{ getColor(item.risk) }">{ item.risk ?? '' }</span>
-                                        {/if}
+                                    {#if null !== item.risk}
+                                        {#if null !== item.size}<span class="text-muted small px-1">/</span>{/if}
+                                        <span class="text-nowrap small text-{ getColor(showItem(item) ? item.risk : null) }">{ (showItem(item) ? item.risk : null) ?? '-' }</span>
+                                    {/if}
 
-                                        {#if null !== item.status}
-                                            {#if null !== item.risk || null !== item.size}<span class="text-muted small px-1">/</span>{/if}
-                                            <span class="text-nowrap small text-{ getColor(item.status) }">{ item.status ?? '' }</span>
-                                        {/if}
+                                    {#if null !== item.status}
+                                        {#if null !== item.risk || null !== item.size}<span class="text-muted small px-1">/</span>{/if}
+                                        <span class="text-nowrap small text-{ getColor(showItem(item) ? item.status : null) }">{ (showItem(item) ? item.status : null) ?? '-' }</span>
+                                    {/if}
 
-                                        {#if (null !== item.risk || null !== item.size || null !== item.status) && null !== (item.calculated ?? null)}
-                                            <span class="text-muted small px-1">/</span>
-                                            <span class="text-nowrap fs-5 text-muted" title="{ item.calculatedInfo ?? ''}"><Icon name="calculator" />&nbsp;{ item.calculated ?? ''}</span>
-                                        {/if}
+                                    {#if (null !== item.risk || null !== item.size || null !== item.status) && null !== (item.calculated ?? null)}
+                                        <span class="text-muted small px-1">/</span>
+                                        <span class="text-nowrap text-muted" title="{ item.calculatedInfo ?? ''}">
+                                            {#if showItem(item) }<Icon name="calculator" />{/if}
+                                            { (showItem(item) ? item.calculated : null) ?? '-' }
+                                        </span>
                                     {/if}
                                 </td>
                             {/if}
@@ -767,9 +796,9 @@
                 <h4>Calculation <Icon name="calculator" /></h4>
                 <p>Each factor has its own impact on calculated SP value:</p>
                 <ul>
-                    <li>Size: XS (0), S (+1), M (+2), L (+3), XXL (+7)</li>
-                    <li>Risk: Safe (0), Unclear (+1), Risky (+2)</li>
-                    <li>Status: Ready (0), Solution/Contract required (+1), Needs research (+3)</li>
+                    <li>Size: XS (0), S (+1), M (+5), L (+5), XXL (+7)</li>
+                    <li>Risk: Safe (0), 50ml Wrisky (+1), Risky (+3)</li>
+                    <li>Status: Ready (0), Needs clarification (+2), Needs research (+3)</li>
                 </ul>
                 <p>Note: this is number of grades on SP scale. +5 stands for 8 SP.</p>
 

@@ -122,12 +122,12 @@ export const enum SizeEnum {
 
 export const enum RiskEnum {
 	Safe = 'Safe',
-	Unclear = 'Unclear',
+	Risky50 = '50ml Wrisky',
 	Risky = 'Risky',
 }
 
 export const enum StatusEnum {
 	Ready = 'Ready',
-	SolutionContractRequired = 'Solution/Contract required',
+	NeedsClarification = 'Needs clarification',
 	NeedsResearch = 'Needs research',
 }

@@ -37,14 +37,14 @@ function buildRoomResponse(room, profileId) {
             switch (value) {
                 case 'XS': return 0
                 case 'S': return 1
-                case 'M': return 2
-                case 'L': return 3
+                case 'M': return 3
+                case 'L': return 5
                 case 'XXL': return 7
                 case 'Safe': return 0
-                case 'Unclear': return 1
-                case 'Risky': return 2
+                case '50ml Wrisky': return 1
+                case 'Risky': return 3
                 case 'Ready': return 0
-                case 'Solution/Contract required': return 1
+                case 'Needs clarification': return 2
                 case 'Needs research': return 3
             }
             return 0
